@@ -1,0 +1,115 @@
+.vnpay-return-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-color: #FAF7F2;
+}
+
+.vnpay-return-card {
+  background-color: white;
+  border: 1px solid #E5DFD5;
+  border-radius: 1.25rem;
+  padding: 2.5rem 2rem;
+  max-width: 32rem;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 40px -15px rgba(44, 36, 32, 0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+.vnpay-icon-badge {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem auto;
+}
+
+.vnpay-icon-badge.success {
+  background-color: #DCFCE7;
+  color: #16A34A;
+}
+
+.vnpay-icon-badge.failed {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.vnpay-icon-badge.loading {
+  background-color: #F3EEE7;
+  color: #8B5E34;
+}
+
+.vnpay-return-title {
+  font-family: 'Cinzel', 'Playfair Display', serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2C2420;
+  margin-bottom: 0.5rem;
+}
+
+.vnpay-return-desc {
+  font-size: 1rem;
+  color: #5C524A;
+  margin-bottom: 1.5rem;
+}
+
+.vnpay-details-table {
+  background-color: #FAF7F2;
+  border: 1px solid #E5DFD5;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.vnpay-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #E5DFD5;
+  font-size: 0.925rem;
+}
+
+.vnpay-detail-row:last-child {
+  border-bottom: none;
+}
+
+.vnpay-detail-row span:first-child {
+  color: #8C827A;
+}
+
+.vnpay-detail-row span:last-child {
+  font-weight: 600;
+  color: #2C2420;
+}
+
+.vnpay-btn-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.vnpay-btn-primary {
+  padding: 0.875rem 1.5rem;
+  background-color: #8B5E34;
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.vnpay-btn-primary:hover {
+  background-color: #6E4927;
+  transform: translateY(-1px);
+}

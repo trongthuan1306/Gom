@@ -1,0 +1,1 @@
+package vn.gomviet.controller; import org.springframework.web.bind.annotation.*;import java.util.Map; @RestController @RequestMapping("/api/admin") public class AdminController{@GetMapping("/status") Map<String,String> status(){return Map.of("scope","ADMIN","status","ready");}}

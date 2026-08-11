@@ -1,0 +1,1 @@
+package vn.gomviet.repository; import org.springframework.data.jpa.repository.JpaRepository;import vn.gomviet.entity.RefreshToken;import java.util.Optional; public interface RefreshTokenRepository extends JpaRepository<RefreshToken,Long>{Optional<RefreshToken> findByTokenHashAndRevokedFalse(String hash);}

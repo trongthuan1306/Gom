@@ -1,0 +1,2 @@
+import {MessageCircle,X} from 'lucide-react';import {useState} from 'react'
+export function ChatButton(){const[open,setOpen]=useState(false);return <div className="chat"><button className="chat-toggle" onClick={()=>setOpen(!open)} aria-label="Mở trợ lý Gốm Việt">{open?<X/>:<MessageCircle/>}</button>{open&&<div className="chat-panel"><strong>Trợ lý Gốm Việt</strong><p>Xin chào! Tôi có thể giúp bạn chọn sản phẩm gốm phù hợp.</p><div className="chat-placeholder">Chatbot Gemini sẽ kết nối qua backend.</div><input placeholder="Nhập câu hỏi..." disabled/></div>}</div>}
