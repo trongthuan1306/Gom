@@ -18,7 +18,7 @@ export type Product = {
 };
 
 export type Category = {
-  id: string;
+  id: string | number;
   season: 'Xuân' | 'Hạ' | 'Thu' | 'Đông' | string;
   flower: string;
   flowerIcon: string;
@@ -26,4 +26,6 @@ export type Category = {
   meaning: string;
   description: string;
   image: string;
+  imageUrl?: string;
+  slug?: string;
 };

@@ -25,7 +25,7 @@ export function CategoryCard({ category, isSelected, canEdit, onSelect, onEdit, 
       tabIndex={0}
     >
       <div className="category-img-wrap">
-        <img src={category.image} alt={category.name} loading="lazy" />
+        <img src={category.imageUrl || category.image} alt={category.name} loading="lazy" />
         <div className="category-img-overlay" />
         <div className="category-flower-badge">
           <span>{category.flowerIcon}</span>

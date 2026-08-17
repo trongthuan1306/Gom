@@ -409,6 +409,13 @@ export const cartApi = {
 };
 
 // ── Location & Order & Payment API ──────────────────────────────────
+export const categoriesApi = {
+  list: () => request<Category[] | any[]>('/categories', {}, undefined),
+  create: (body: any) => request<any>('/categories', { method: 'POST', body: JSON.stringify(body) }),
+  update: (id: number | string, body: any) => request<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
+  delete: (id: number | string) => request<void>(`/categories/${id}`, { method: 'DELETE' }),
+};
+
 export const locationsApi = {
   getProvinces: (q?: string) => request<ProvinceResponse[]>(`/locations/provinces${q ? `?q=${encodeURIComponent(q)}` : ''}`, {}, undefined),
   getWards: (provinceCode: string, q?: string) => request<WardResponse[]>(`/locations/provinces/${provinceCode}/wards${q ? `?q=${encodeURIComponent(q)}` : ''}`, {}, undefined),
@@ -495,3 +502,65 @@ export const staffApi = {
 };
 
 export const adminApi = { status: () => request<{ scope: string; status: string }>('/admin/status') }
+
+// ── Categories API (DB-backed) ──────────────────────────────────────
+type CategoryResponse = {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  season: string;
+  flower: string;
+  flowerIcon: string;
+  meaning: string;
+  imageUrl: string;
+};
+
+type CategoryRequest = {
+  name: string;
+  slug?: string;
+  description?: string;
+  season?: string;
+  flower?: string;
+  flowerIcon?: string;
+  meaning?: string;
+  imageUrl?: string;
+};
+
+function mapCategoryResponse(c: CategoryResponse) {
+  return {
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    description: c.description || '',
+    season: c.season || '',
+    flower: c.flower || '',
+    flowerIcon: c.flowerIcon || '',
+    meaning: c.meaning || '',
+    image: c.imageUrl || '',
+    imageUrl: c.imageUrl || '',
+  };
+}
+
+export const categoriesApi = {
+  list: async () => {
+    const data = await request<CategoryResponse[]>('/categories');
+    return (data || []).map(mapCategoryResponse);
+  },
+  create: async (payload: CategoryRequest) => {
+    const data = await request<CategoryResponse>('/categories', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return mapCategoryResponse(data);
+  },
+  update: async (id: string | number, payload: CategoryRequest) => {
+    const data = await request<CategoryResponse>(`/categories/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+    return mapCategoryResponse(data);
+  },
+  delete: (id: string | number) =>
+    request<void>(`/categories/${id}`, { method: 'DELETE' }),
+};

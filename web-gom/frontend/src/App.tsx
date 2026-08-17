@@ -16,8 +16,7 @@ import { VnPayReturnPage } from './components/VnPayReturnPage'
 import { CheckoutPage } from './components/CheckoutPage'
 import { AdminDashboardPage } from './components/AdminDashboardPage'
 import { products as mockProducts } from './data/mockData'
-import { getStoredCategories, saveStoredCategory, deleteStoredCategory } from './utils/categoryStorage'
-import { productsApi, authApi, session, type UserProfile } from './api/client'
+import { productsApi, categoriesApi, authApi, session, type UserProfile } from './api/client'
 import { CartProvider } from './hooks/useCart'
 import {
   FlowerNguSacMotif,
@@ -41,7 +40,7 @@ const policyDirections = ['reveal-left', 'reveal-bottom', 'reveal-top', 'reveal-
 
 export default function App() {
   const [productList, setProductList] = useState<Product[]>([])
-  const [categoriesList, setCategoriesList] = useState<Category[]>(getStoredCategories())
+  const [categoriesList, setCategoriesList] = useState<Category[]>([])
   const [user, setUser] = useState<UserProfile | null>(null)
   const [addProductOpen, setAddProductOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -63,6 +62,15 @@ export default function App() {
       setProductList(realProducts || [])
     } catch {
       setProductList([])
+    }
+  }
+
+  async function loadCategories() {
+    try {
+      const realCategories = await categoriesApi.list()
+      setCategoriesList(realCategories || [])
+    } catch {
+      setCategoriesList([])
     }
   }
 
@@ -92,17 +100,40 @@ export default function App() {
     }
   }
 
-  function handleSaveCategory(savedCat: Category) {
-    const updated = saveStoredCategory(savedCat)
-    setCategoriesList(updated)
+  async function handleSaveCategory(savedCat: Category) {
+    try {
+      const payload = {
+        name: savedCat.name,
+        season: savedCat.season,
+        flower: savedCat.flower,
+        flowerIcon: savedCat.flowerIcon,
+        meaning: savedCat.meaning,
+        description: savedCat.description,
+        imageUrl: savedCat.imageUrl || savedCat.image,
+      }
+      if (savedCat.id && !isNaN(Number(savedCat.id)) && Number(savedCat.id) > 0) {
+        await categoriesApi.update(savedCat.id, payload)
+      } else {
+        await categoriesApi.create(payload)
+      }
+      await loadCategories()
+    } catch (err: any) {
+      alert(err.message || 'Lưu bộ sưu tập vào cơ sở dữ liệu thất bại')
+    }
   }
 
-  function handleDeleteCategory(cat: Category) {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa bộ sưu tập "${cat.name}"?`)) {
+  async function handleDeleteCategory(cat: Category) {
+    if (!window.confirm(`Bạn có chắc chắn muốn xóa bộ sưu tập "${cat.name}" khỏi cơ sở dữ liệu?`)) {
       return
     }
-    const updated = deleteStoredCategory(cat.id)
-    setCategoriesList(updated)
+    try {
+      if (cat.id) {
+        await categoriesApi.delete(cat.id)
+        await loadCategories()
+      }
+    } catch (err: any) {
+      alert(err.message || 'Xóa bộ sưu tập thất bại')
+    }
   }
 
   function handleEditCategory(cat: Category) {
@@ -133,6 +164,7 @@ export default function App() {
 
   useEffect(() => {
     void loadProducts()
+    void loadCategories()
     void checkUserRole()
   }, [])
 

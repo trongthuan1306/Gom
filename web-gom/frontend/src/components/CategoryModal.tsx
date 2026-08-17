@@ -25,16 +25,16 @@ export function CategoryModal({ category, isOpen, onClose, onSave }: CategoryMod
 
   useEffect(() => {
     if (category) {
-      setId(category.id)
+      setId(String(category.id))
       setName(category.name)
       setSeason(category.season)
       setFlower(category.flower)
       setFlowerIcon(category.flowerIcon || '🌸')
       setMeaning(category.meaning)
       setDescription(category.description)
-      setImage(category.image)
+      setImage(category.imageUrl || category.image || '')
     } else {
-      setId(`col_${Date.now()}`)
+      setId('')
       setName('')
       setSeason('Xuân')
       setFlower('')
@@ -91,14 +91,15 @@ export function CategoryModal({ category, isOpen, onClose, onSave }: CategoryMod
     }
 
     const savedCat: Category = {
-      id: id || `col_${Date.now()}`,
+      id: id || '',
       name: name.trim(),
       season: season.trim(),
       flower: flower.trim(),
       flowerIcon: flowerIcon.trim() || '🌸',
       meaning: meaning.trim(),
       description: description.trim(),
-      image: image.trim()
+      image: image.trim(),
+      imageUrl: image.trim()
     }
 
     onSave(savedCat)

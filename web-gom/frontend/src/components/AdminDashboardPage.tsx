@@ -32,8 +32,7 @@ import {
 } from 'lucide-react'
 import type { Product, Category } from '../types'
 import { formatPrice } from '../data/mockData'
-import { staffApi, productsApi, type DashboardStats, type OrderResponse, type LowStockProduct } from '../api/client'
-import { getStoredCategories, saveStoredCategory, deleteStoredCategory, resetStoredCategories } from '../utils/categoryStorage'
+import { staffApi, productsApi, categoriesApi, type DashboardStats, type OrderResponse, type LowStockProduct } from '../api/client'
 import { EditProductModal } from './EditProductModal'
 import { AddProductModal } from './AddProductModal'
 import { CategoryModal } from './CategoryModal'
@@ -63,7 +62,7 @@ export function AdminDashboardPage({
   const [categorySearchQuery, setCategorySearchQuery] = useState('')
 
   // Collections state
-  const [categoriesList, setCategoriesList] = useState<Category[]>(getStoredCategories())
+  const [categoriesList, setCategoriesList] = useState<Category[]>([])
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
 
@@ -77,34 +76,52 @@ export function AdminDashboardPage({
   const [addProductOpen, setAddProductOpen] = useState(false)
   const [selectedOrderDetail, setSelectedOrderDetail] = useState<OrderResponse | null>(null)
 
-  function handleSaveCategory(savedCat: Category) {
-    const updated = saveStoredCategory(savedCat)
-    setCategoriesList(updated)
-    if (onCategoriesChanged) onCategoriesChanged(updated)
-    setSuccessMsg(`Đã lưu bộ sưu tập "${savedCat.name}" thành công`)
-    setTimeout(() => setSuccessMsg(''), 3000)
+  async function loadAdminCategories() {
+    try {
+      const data = await categoriesApi.list()
+      setCategoriesList(data)
+      if (onCategoriesChanged) onCategoriesChanged(data)
+    } catch (err: any) {
+      console.error('Failed to load categories', err)
+    }
   }
 
-  function handleDeleteCategory(cat: Category) {
+  async function handleSaveCategory(savedCat: Category) {
+    try {
+      const payload = {
+        name: savedCat.name,
+        season: savedCat.season,
+        flower: savedCat.flower,
+        flowerIcon: savedCat.flowerIcon,
+        meaning: savedCat.meaning,
+        description: savedCat.description,
+        imageUrl: savedCat.imageUrl || savedCat.image,
+      }
+      if (savedCat.id && !isNaN(Number(savedCat.id)) && Number(savedCat.id) > 0) {
+        await categoriesApi.update(savedCat.id, payload)
+      } else {
+        await categoriesApi.create(payload)
+      }
+      await loadAdminCategories()
+      setSuccessMsg(`Đã lưu bộ sưu tập "${savedCat.name}" thành công`)
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err: any) {
+      setError(err.message || 'Lưu bộ sưu tập thất bại')
+    }
+  }
+
+  async function handleDeleteCategory(cat: Category) {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa bộ sưu tập "${cat.name}"?`)) {
       return
     }
-    const updated = deleteStoredCategory(cat.id)
-    setCategoriesList(updated)
-    if (onCategoriesChanged) onCategoriesChanged(updated)
-    setSuccessMsg(`Đã xóa bộ sưu tập "${cat.name}"`)
-    setTimeout(() => setSuccessMsg(''), 3000)
-  }
-
-  function handleResetCategories() {
-    if (!window.confirm('Khôi phục danh sách bộ sưu tập 4 mùa về mặc định ban đầu?')) {
-      return
+    try {
+      await categoriesApi.delete(cat.id)
+      await loadAdminCategories()
+      setSuccessMsg(`Đã xóa bộ sưu tập "${cat.name}"`)
+      setTimeout(() => setSuccessMsg(''), 3000)
+    } catch (err: any) {
+      setError(err.message || 'Xóa bộ sưu tập thất bại')
     }
-    const updated = resetStoredCategories()
-    setCategoriesList(updated)
-    if (onCategoriesChanged) onCategoriesChanged(updated)
-    setSuccessMsg('Đã khôi phục các bộ sưu tập 4 mùa mặc định')
-    setTimeout(() => setSuccessMsg(''), 3000)
   }
 
   // Scroll to top
@@ -131,6 +148,7 @@ export function AdminDashboardPage({
 
   useEffect(() => {
     void loadData()
+    void loadAdminCategories()
   }, [selectedStatusFilter])
 
   async function handleStatusChange(orderId: number, newStatus: string) {
@@ -979,15 +997,6 @@ export function AdminDashboardPage({
               </div>
 
               <div style={{ display: 'flex', gap: '10px' }}>
-                <button
-                  className="btn-cat-cancel"
-                  style={{ padding: '8px 14px', fontSize: '0.88rem' }}
-                  onClick={handleResetCategories}
-                  title="Khôi phục về 4 mùa gốc"
-                >
-                  <RotateCcw size={15} style={{ marginRight: '4px' }} />
-                  <span>Khôi phục mặc định</span>
-                </button>
                 <button
                   className="btn-admin-add-product"
                   onClick={() => {
