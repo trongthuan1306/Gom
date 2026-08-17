@@ -1,0 +1,3 @@
+ALTER TABLE products ADD COLUMN item_type VARCHAR(100);
+ALTER TABLE products ADD COLUMN flower_type VARCHAR(100);
+ALTER TABLE products ADD COLUMN season VARCHAR(100);

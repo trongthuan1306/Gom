@@ -40,7 +40,7 @@ const directions = ['reveal-left', 'reveal-top', 'reveal-right', 'reveal-bottom'
 const policyDirections = ['reveal-left', 'reveal-bottom', 'reveal-top', 'reveal-right']
 
 export default function App() {
-  const [productList, setProductList] = useState<Product[]>(mockProducts)
+  const [productList, setProductList] = useState<Product[]>([])
   const [categoriesList, setCategoriesList] = useState<Category[]>(getStoredCategories())
   const [user, setUser] = useState<UserProfile | null>(null)
   const [addProductOpen, setAddProductOpen] = useState(false)
@@ -60,14 +60,9 @@ export default function App() {
   async function loadProducts() {
     try {
       const realProducts = await productsApi.list()
-      if (realProducts && realProducts.length > 0) {
-        // Gộp sản phẩm thật (từ DB) lên đầu + sản phẩm mẫu phía sau
-        const realIds = new Set(realProducts.map(p => p.id))
-        const fillers = mockProducts.filter(m => !realIds.has(m.id))
-        setProductList([...realProducts, ...fillers])
-      }
+      setProductList(realProducts || [])
     } catch {
-      // Fallback to mock data if backend not reachable
+      setProductList([])
     }
   }
 

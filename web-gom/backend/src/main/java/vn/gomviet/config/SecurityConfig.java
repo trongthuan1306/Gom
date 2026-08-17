@@ -30,9 +30,10 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource(@Value("${app.frontend-url}") String origin) {
     var config = new CorsConfiguration();
-    config.setAllowedOriginPatterns(List.of(origin, "http://localhost:*", "http://127.0.0.1:*", "http://[::1]:*"));
+    config.setAllowedOriginPatterns(List.of(origin, "https://*.vercel.app", "http://localhost:*", "http://127.0.0.1:*", "http://[::1]:*"));
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-    config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+    config.setAllowedHeaders(List.of("*"));
+    config.setExposedHeaders(List.of("*"));
     config.setAllowCredentials(true);
     var source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", config);

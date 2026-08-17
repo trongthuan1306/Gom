@@ -1,0 +1,10 @@
+.git
+.github
+frontend
+backend/target
+backend/.settings
+backend/.vscode
+backend/.idea
+*.md
+env-cloudrun.yaml
+docker-compose*.yml
