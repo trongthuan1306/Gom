@@ -18,7 +18,10 @@ public class ProductMapper {
             p.getMaterials(),
             p.getDimensions(),
             p.getOrigin(),
-            p.getCareInstructions()
+            p.getCareInstructions(),
+            p.getItemType(),
+            p.getFlowerType(),
+            p.getSeason()
         );
     }
 }

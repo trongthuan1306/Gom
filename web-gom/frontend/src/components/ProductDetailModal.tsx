@@ -42,7 +42,7 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
 
   const stock = detail.stockQuantity ?? 10
   const isOutOfStock = stock <= 0
-  const description = detail.description || 'Sản phẩm gốm Việt được làm thủ công tỉ mỉ từ đất sét tự nhiên, nung ở nhiệt độ cao mang lại bề mặt men đầm ấm, an toàn cho sức khỏe và độ bền cao theo thời gian.'
+  const description = detail.description || 'Sản phẩm Hiên Gốm được làm thủ công tỉ mỉ từ đất sét tự nhiên, nung ở nhiệt độ cao mang lại bề mặt men đầm ấm, an toàn cho sức khỏe và độ bền cao theo thời gian.'
 
   async function handleAddToCart() {
     if (isOutOfStock) return
@@ -84,6 +84,15 @@ export function ProductDetailModal({ product, onClose }: ProductDetailModalProps
           <div>
             <div className="product-detail-category">{detail.category}</div>
             <h2 className="product-detail-title">{detail.name}</h2>
+
+            {/* Attribute Tags */}
+            {(detail.itemType || detail.flowerType || detail.season) && (
+              <div className="product-attr-tags" style={{ marginBottom: 12 }}>
+                {detail.itemType && <span className="product-attr-tag">{detail.itemType}</span>}
+                {detail.flowerType && <span className="product-attr-tag">🌸 {detail.flowerType}</span>}
+                {detail.season && <span className="product-attr-tag">🍃 {detail.season}</span>}
+              </div>
+            )}
 
             <div className="product-detail-price-row">
               <span className="product-detail-price">{formatPrice(detail.price)}</span>

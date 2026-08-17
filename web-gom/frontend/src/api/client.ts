@@ -9,8 +9,31 @@ export type LoginRequest={email:string;password:string};
 export type UpdateProfileRequest={fullName:string;phone?:string;address?:string};
 export type ChangePasswordRequest={currentPassword:string;newPassword:string};
 export type MessageResponse={message:string};
-export type ChatMessage={role:string;content:string};
-export type ChatResponse={answer:string;recommendations:{productId:number;reason:string}[]}
+export type ChatRecommendation = {
+  productId: number;
+  reason: string;
+  name?: string;
+  price?: number;
+  image?: string;
+  season?: string;
+  itemType?: string;
+};
+export type ChatMessage = {
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  recommendations?: ChatRecommendation[];
+  createdAt?: string;
+};
+export type ChatResponse = {
+  sessionToken: string;
+  answer: string;
+  recommendations: ChatRecommendation[];
+};
+export type ChatHistoryResponse = {
+  sessionToken: string;
+  title: string;
+  messages: ChatMessage[];
+};
 
 // ── Cart Types ──────────────────────────────────────────────────────
 export type CartItemResponse = {
@@ -95,7 +118,9 @@ export const session={
   clear:()=>{
     localStorage.removeItem(ACCESS);
     localStorage.removeItem(REFRESH);
-    localStorage.removeItem(EXPIRES)
+    localStorage.removeItem(EXPIRES);
+    localStorage.removeItem('webgom_chat_session_token');
+    window.dispatchEvent(new CustomEvent('webgom_chat_reset'));
   }
 }
 
@@ -147,6 +172,9 @@ type ApiProduct = {
   dimensions: string | null;
   origin: string | null;
   careInstructions: string | null;
+  itemType: string | null;
+  flowerType: string | null;
+  season: string | null;
 };
 const fallbackImage='https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&w=900&q=80';
 
@@ -156,7 +184,7 @@ export const productsApi={
     return products.map(product=>({
       id:product.id,
       name:product.name,
-      category:'Gốm Việt',
+      category:'Hiên Gốm',
       price:product.price,
       image:product.imageUrl||fallbackImage,
       description:product.description||undefined,
@@ -165,7 +193,10 @@ export const productsApi={
       materials:product.materials||undefined,
       dimensions:product.dimensions||undefined,
       origin:product.origin||undefined,
-      careInstructions:product.careInstructions||undefined
+      careInstructions:product.careInstructions||undefined,
+      itemType:product.itemType||undefined,
+      flowerType:product.flowerType||undefined,
+      season:product.season||undefined
     } as Product))
   },
 
@@ -181,7 +212,7 @@ export const productsApi={
     return {
       id: product.id,
       name: product.name,
-      category: 'Gốm Việt',
+      category: 'Hiên Gốm',
       price: product.price,
       image: product.imageUrl || fallbackImage,
       description: product.description || undefined,
@@ -190,11 +221,14 @@ export const productsApi={
       materials: product.materials || undefined,
       dimensions: product.dimensions || undefined,
       origin: product.origin || undefined,
-      careInstructions: product.careInstructions || undefined
+      careInstructions: product.careInstructions || undefined,
+      itemType: product.itemType || undefined,
+      flowerType: product.flowerType || undefined,
+      season: product.season || undefined
     };
   },
 
-  create:async(productData:{name:string;price:number;stockQuantity:number;description?:string;materials?:string;dimensions?:string;origin?:string;careInstructions?:string}, imageFile?:File):Promise<Product>=>{
+  create:async(productData:{name:string;price:number;stockQuantity:number;description?:string;materials?:string;dimensions?:string;origin?:string;careInstructions?:string;itemType?:string;flowerType?:string;season?:string}, imageFile?:File):Promise<Product>=>{
     const formData = new FormData();
     const productBlob = new Blob([JSON.stringify(productData)], { type: 'application/json' });
     formData.append('product', productBlob);
@@ -215,10 +249,21 @@ export const productsApi={
     if (!response.ok) {
       let errorText = response.statusText;
       try {
-        const errJson = await response.json();
-        errorText = errJson.message || errorText;
+        const rawText = await response.text();
+        if (rawText) {
+          try {
+            const errJson = JSON.parse(rawText);
+            errorText = errJson.message || errJson.error || rawText;
+          } catch {
+            errorText = rawText;
+          }
+        }
       } catch {
-        errorText = (await response.text()) || errorText;
+        // fallback to statusText
+      }
+
+      if (response.status === 401 || response.status === 403) {
+        errorText = 'Bạn cần đăng nhập tài khoản Quản trị (Admin) hoặc Nhân viên (Staff) để thêm sản phẩm.';
       }
       throw new ApiError(response.status, errorText);
     }
@@ -227,7 +272,7 @@ export const productsApi={
     return {
       id: created.id,
       name: created.name,
-      category: 'Gốm Việt',
+      category: 'Hiên Gốm',
       price: created.price,
       image: created.imageUrl || fallbackImage,
       description: created.description || undefined,
@@ -236,8 +281,115 @@ export const productsApi={
       materials: created.materials || undefined,
       dimensions: created.dimensions || undefined,
       origin: created.origin || undefined,
-      careInstructions: created.careInstructions || undefined
+      careInstructions: created.careInstructions || undefined,
+      itemType: created.itemType || undefined,
+      flowerType: created.flowerType || undefined,
+      season: created.season || undefined
     };
+  },
+
+  update: async (
+    id: number,
+    productData: {
+      name: string;
+      price: number;
+      stockQuantity: number;
+      description?: string;
+      materials?: string;
+      dimensions?: string;
+      origin?: string;
+      careInstructions?: string;
+      itemType?: string;
+      flowerType?: string;
+      season?: string;
+    },
+    imageFile?: File
+  ): Promise<Product> => {
+    const formData = new FormData();
+    const productBlob = new Blob([JSON.stringify(productData)], { type: 'application/json' });
+    formData.append('product', productBlob);
+
+    if (imageFile) {
+      formData.append('image', imageFile);
+    }
+
+    const token = session.accessToken();
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'PUT',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      let errorText = response.statusText;
+      try {
+        const rawText = await response.text();
+        if (rawText) {
+          try {
+            const errJson = JSON.parse(rawText);
+            errorText = errJson.message || errJson.error || rawText;
+          } catch {
+            errorText = rawText;
+          }
+        }
+      } catch {
+        // fallback
+      }
+
+      if (response.status === 401 || response.status === 403) {
+        errorText = 'Bạn không có quyền chỉnh sửa sản phẩm này.';
+      }
+      throw new ApiError(response.status, errorText);
+    }
+
+    const updated = (await response.json()) as ApiProduct;
+    return {
+      id: updated.id,
+      name: updated.name,
+      category: 'Hiên Gốm',
+      price: updated.price,
+      image: updated.imageUrl || fallbackImage,
+      description: updated.description || undefined,
+      stockQuantity: updated.stockQuantity,
+      slug: updated.slug,
+      materials: updated.materials || undefined,
+      dimensions: updated.dimensions || undefined,
+      origin: updated.origin || undefined,
+      careInstructions: updated.careInstructions || undefined,
+      itemType: updated.itemType || undefined,
+      flowerType: updated.flowerType || undefined,
+      season: updated.season || undefined
+    };
+  },
+
+  delete: async (id: number): Promise<void> => {
+    const token = session.accessToken();
+    const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+      method: 'DELETE',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
+
+    if (!response.ok) {
+      let errorText = response.statusText;
+      try {
+        const rawText = await response.text();
+        if (rawText) {
+          try {
+            const errJson = JSON.parse(rawText);
+            errorText = errJson.message || errJson.error || rawText;
+          } catch {
+            errorText = rawText;
+          }
+        }
+      } catch {
+        // fallback
+      }
+      throw new ApiError(response.status, errorText);
+    }
   }
 }
 
@@ -273,6 +425,73 @@ export const paymentsApi = {
   verifyVnPayReturn: (queryString: string) => request<VnPayReturnResult>(`/payments/vnpay-return${queryString}`, {}, undefined),
 };
 
-export const chatApi={send:(messages:ChatMessage[])=>request<ChatResponse>('/chat',{method:'POST',body:JSON.stringify({messages})})};
-export const staffApi={status:()=>request<{scope:string;status:string}>('/staff/status')};
-export const adminApi={status:()=>request<{scope:string;status:string}>('/admin/status')}
+export interface DailyRevenue {
+  date: string;
+  revenue: number;
+  orderCount: number;
+}
+
+export interface TopSellingProduct {
+  productId: number;
+  productName: string;
+  imageUrl?: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+}
+
+export interface LowStockProduct {
+  id: number;
+  name: string;
+  imageUrl?: string;
+  price: number;
+  stockQuantity: number;
+}
+
+export interface DashboardStats {
+  totalRevenue: number;
+  todayRevenue?: number;
+  thisMonthRevenue?: number;
+  totalOrders: number;
+  todayOrders?: number;
+  thisMonthOrders?: number;
+  pendingOrders: number;
+  confirmedOrders: number;
+  shippingOrders: number;
+  completedOrders: number;
+  cancelledOrders: number;
+  totalCustomers: number;
+  totalProducts: number;
+  lowStockProducts: number;
+  codOrdersCount?: number;
+  vnpayOrdersCount?: number;
+  codRevenue?: number;
+  vnpayRevenue?: number;
+  dailyRevenues?: DailyRevenue[];
+  topSellingProducts?: TopSellingProduct[];
+  lowStockProductList?: LowStockProduct[];
+  recentOrders: OrderResponse[];
+}
+
+export const chatApi = {
+  send: (messages: ChatMessage[], sessionToken?: string) =>
+    request<ChatResponse>('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ messages, sessionToken: sessionToken || undefined }),
+    }),
+  getHistory: (sessionToken: string) =>
+    request<ChatHistoryResponse>(`/chat/history/${encodeURIComponent(sessionToken)}`),
+  clearHistory: (sessionToken: string) =>
+    request<void>(`/chat/history/${encodeURIComponent(sessionToken)}`, {
+      method: 'DELETE',
+    }),
+};
+
+export const staffApi = {
+  status: () => request<{ scope: string; status: string }>('/staff/status'),
+  getOrders: (status?: string) => request<OrderResponse[]>(`/staff/orders${status && status !== 'ALL' ? `?status=${status}` : ''}`),
+  getOrderById: (id: number) => request<OrderResponse>(`/staff/orders/${id}`),
+  updateOrderStatus: (id: number, status: string) => request<OrderResponse>(`/staff/orders/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) }),
+  getDashboardStats: () => request<DashboardStats>('/staff/dashboard/stats'),
+};
+
+export const adminApi = { status: () => request<{ scope: string; status: string }>('/admin/status') }

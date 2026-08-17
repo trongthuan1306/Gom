@@ -116,7 +116,7 @@
   position: absolute;
   top: 1.25rem;
   left: 1.25rem;
-  background: #c86d3b;
+  background: var(--brand-red, #731214);
   color: #ffffff;
   font-size: 0.8rem;
   font-weight: 700;
@@ -124,7 +124,7 @@
   border-radius: 999px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  box-shadow: 0 4px 12px rgba(200, 109, 59, 0.3);
+  box-shadow: 0 4px 12px rgba(115, 18, 20, 0.3);
 }
 
 .detail-heart-btn {
@@ -168,9 +168,9 @@
 }
 
 .thumb-item.active {
-  border-color: #c86d3b;
+  border-color: var(--brand-red, #731214);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(200, 109, 59, 0.2);
+  box-shadow: 0 4px 12px rgba(115, 18, 20, 0.2);
 }
 
 .thumb-item img {
@@ -194,7 +194,7 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #c86d3b;
+  background: var(--brand-red, #731214);
   color: white;
   display: flex;
   align-items: center;
@@ -227,7 +227,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #c86d3b;
+  color: var(--brand-red, #731214);
 }
 
 .detail-title {
@@ -272,7 +272,7 @@
 .detail-price-val {
   font-size: 2rem;
   font-weight: 800;
-  color: #c86d3b;
+  color: var(--brand-red, #731214);
 }
 
 .detail-stock-pill {
@@ -378,9 +378,9 @@
 
 .btn-add-cart-page {
   padding: 1rem 1.25rem;
-  background: #f8f2ea;
-  color: #3d2c1d;
-  border: 2px solid #c86d3b;
+  background: #faf4f2;
+  color: var(--brand-red, #731214);
+  border: 2px solid var(--brand-red, #731214);
   border-radius: 10px;
   font-size: 1rem;
   font-weight: 700;
@@ -393,14 +393,14 @@
 }
 
 .btn-add-cart-page:hover:not(:disabled) {
-  background: #c86d3b;
+  background: var(--brand-red, #731214);
   color: #ffffff;
   transform: translateY(-2px);
 }
 
 .btn-buy-now-page {
   padding: 1rem 1.25rem;
-  background: #c86d3b;
+  background: var(--brand-red, #731214);
   color: #ffffff;
   border: none;
   border-radius: 10px;
@@ -411,12 +411,12 @@
   align-items: center;
   justify-content: center;
   gap: 0.6rem;
-  box-shadow: 0 6px 18px rgba(200, 109, 59, 0.3);
+  box-shadow: 0 6px 18px rgba(115, 18, 20, 0.3);
   transition: all 0.2s;
 }
 
 .btn-buy-now-page:hover:not(:disabled) {
-  background: #a95628;
+  background: var(--brand-red-hover, #8d181b);
   transform: translateY(-2px);
 }
 
@@ -439,7 +439,7 @@
 }
 
 .perk-card svg {
-  color: #c86d3b;
+  color: var(--brand-red, #731214);
   flex-shrink: 0;
 }
 
@@ -575,64 +575,124 @@
   display: block;
 }
 
-/* Specification Table */
-.specs-table {
+/* ── Product Details Tabs Section ── */
+.detail-tabs-section {
+  max-width: 1200px;
+  margin: 3.5rem auto 0 auto;
+  padding: 0 1.5rem;
+}
+
+.tabs-nav-bar {
+  display: flex;
+  gap: 1.5rem;
+  border-bottom: 2px solid #ebd9c8;
+  margin-bottom: 1.5rem;
+  overflow-x: auto;
+}
+
+.tab-item-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #7a6858;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tab-item-btn:hover {
+  color: var(--brand-red, #731214);
+}
+
+.tab-item-btn.active {
+  color: var(--brand-red, #731214);
+  border-bottom-color: var(--brand-red, #731214);
+}
+
+.tab-pane-content {
+  background: #ffffff;
+  padding: 2.25rem;
+  border-radius: 16px;
+  border: 1px solid #ebd9c8;
+  box-shadow: 0 4px 20px rgba(61, 44, 29, 0.04);
+}
+
+.tab-desc-pane h3,
+.tab-specs-pane h3,
+.tab-care-pane h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #231815;
+}
+
+.tab-desc-pane p {
+  font-size: 0.975rem;
+  line-height: 1.8;
+  color: #554433;
+  margin: 0 0 1rem 0;
+}
+
+.desc-highlight-box {
+  background: #faf4f2;
+  border-left: 4px solid var(--brand-red, #731214);
+  padding: 1.1rem 1.4rem;
+  border-radius: 0 10px 10px 0;
+  margin-top: 1.5rem;
+}
+
+.desc-highlight-box p {
+  margin: 0;
+  font-size: 0.925rem;
+  line-height: 1.7;
+  color: #4a382c;
+}
+
+.specs-detail-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.specs-table tr {
+.specs-detail-table tr {
   border-bottom: 1px solid #f2e7dc;
 }
 
-.specs-table tr:last-child {
+.specs-detail-table tr:last-child {
   border-bottom: none;
 }
 
-.specs-table td {
-  padding: 1.1rem 1rem;
+.specs-detail-table td {
+  padding: 1rem 0.75rem;
   font-size: 0.95rem;
-}
-
-.specs-table td.spec-label {
-  width: 32%;
-  font-weight: 700;
-  color: #3d2c1d;
-  background: #fdfbf7;
-}
-
-.specs-table td.spec-val {
   color: #554433;
 }
 
-/* Care guide cards */
-.care-guide-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-}
-
-.care-card {
-  padding: 1.5rem;
-  background: #f8f2ea;
-  border-radius: 14px;
-  border: 1px solid #ebd9c8;
-}
-
-.care-card h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 1.1rem;
+.specs-detail-table td:first-child {
+  width: 30%;
   font-weight: 700;
-  color: #c86d3b;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  color: #3d2c1d;
+  background: #fdfbf7;
+  padding-left: 1rem;
 }
 
-.care-card p {
-  margin: 0;
-  font-size: 0.9rem;
-  line-height: 1.6;
+.care-tips-list {
+  margin: 1rem 0 0 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.care-tips-list li {
+  font-size: 0.95rem;
+  line-height: 1.7;
   color: #554433;
 }
 

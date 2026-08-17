@@ -268,7 +268,7 @@ export function ProfileModal({
                 <div className="orders-empty">
                   <Package size={48} className="empty-icon" />
                   <h3>Chưa có đơn hàng nào</h3>
-                  <p>Bạn chưa đặt mua sản phẩm nào tại Gốm Việt.</p>
+                  <p>Bạn chưa đặt mua sản phẩm nào tại Hiên Gốm.</p>
                 </div>
               ) : (
                 <div className="orders-list">

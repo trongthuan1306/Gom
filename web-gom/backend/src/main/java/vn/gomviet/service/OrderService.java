@@ -10,6 +10,11 @@ import vn.gomviet.exception.ApiException;
 import vn.gomviet.repository.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -293,6 +298,200 @@ public class OrderService {
         });
 
         return toOrderResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderDtos.OrderResponse> getAllOrdersForStaff(String statusStr) {
+        List<Order> orders;
+        if (statusStr != null && !statusStr.isBlank() && !"ALL".equalsIgnoreCase(statusStr.trim())) {
+            try {
+                OrderStatus status = OrderStatus.valueOf(statusStr.trim().toUpperCase());
+                orders = orderRepo.findByStatusOrderByCreatedAtDesc(status);
+            } catch (IllegalArgumentException e) {
+                orders = orderRepo.findAllByOrderByCreatedAtDesc();
+            }
+        } else {
+            orders = orderRepo.findAllByOrderByCreatedAtDesc();
+        }
+        return orders.stream().map(this::toOrderResponse).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderDtos.OrderResponse getOrderByIdForStaff(Long orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng #" + orderId));
+        return toOrderResponse(order);
+    }
+
+    @Transactional
+    public OrderDtos.OrderResponse updateOrderStatusByStaff(Long orderId, String newStatusStr) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy đơn hàng #" + orderId));
+
+        OrderStatus newStatus;
+        try {
+            newStatus = OrderStatus.valueOf(newStatusStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "Trạng thái đơn hàng không hợp lệ: " + newStatusStr);
+        }
+
+        OrderStatus oldStatus = order.getStatus();
+        if (oldStatus == newStatus) {
+            return toOrderResponse(order);
+        }
+
+        // If cancelling, restore stock
+        if (newStatus == OrderStatus.CANCELLED && oldStatus != OrderStatus.CANCELLED) {
+            for (OrderItem item : order.getItems()) {
+                Product product = item.getProduct();
+                if (product != null) {
+                    product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+                    productRepo.save(product);
+                }
+            }
+            paymentRepo.findByOrder(order).ifPresent(p -> {
+                p.setStatus(PaymentStatus.FAILED);
+                paymentRepo.save(p);
+            });
+        }
+
+        // If completing, update payment to PAID if COD
+        if (newStatus == OrderStatus.COMPLETED) {
+            paymentRepo.findByOrder(order).ifPresent(p -> {
+                if (p.getStatus() != PaymentStatus.PAID) {
+                    p.setStatus(PaymentStatus.PAID);
+                    paymentRepo.save(p);
+                }
+            });
+        }
+
+        order.setStatus(newStatus);
+        orderRepo.save(order);
+
+        return toOrderResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public OrderDtos.DashboardStatsResponse getDashboardStats() {
+        OrderDtos.DashboardStatsResponse stats = new OrderDtos.DashboardStatsResponse();
+
+        stats.setTotalRevenue(orderRepo.calculateTotalEffectiveRevenue());
+        stats.setTotalOrders(orderRepo.count());
+        stats.setPendingOrders(orderRepo.countByStatus(OrderStatus.PENDING));
+        stats.setConfirmedOrders(orderRepo.countByStatus(OrderStatus.CONFIRMED));
+        stats.setShippingOrders(orderRepo.countByStatus(OrderStatus.SHIPPING));
+        stats.setCompletedOrders(orderRepo.countByStatus(OrderStatus.COMPLETED));
+        stats.setCancelledOrders(orderRepo.countByStatus(OrderStatus.CANCELLED));
+
+        stats.setTotalCustomers(userRepo.countByRole(Role.CUSTOMER));
+        stats.setTotalProducts(productRepo.countByActiveTrue());
+        stats.setLowStockProducts(productRepo.countByStockQuantityLessThanEqualAndActiveTrue(5));
+
+        // Timezone & Date boundaries (Vietnam UTC+7)
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh");
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+        Instant startOfToday = now.toLocalDate().atStartOfDay(zoneId).toInstant();
+        Instant endOfToday = now.toLocalDate().plusDays(1).atStartOfDay(zoneId).toInstant();
+        Instant startOfMonth = now.toLocalDate().withDayOfMonth(1).atStartOfDay(zoneId).toInstant();
+
+        // Today & This month stats
+        BigDecimal todayRev = orderRepo.calculateEffectiveRevenueBetween(startOfToday, endOfToday);
+        stats.setTodayRevenue(todayRev != null ? todayRev : BigDecimal.ZERO);
+        stats.setTodayOrders(orderRepo.countByCreatedAtBetween(startOfToday, endOfToday));
+
+        BigDecimal monthRev = orderRepo.calculateEffectiveRevenueBetween(startOfMonth, endOfToday);
+        stats.setThisMonthRevenue(monthRev != null ? monthRev : BigDecimal.ZERO);
+        stats.setThisMonthOrders(orderRepo.countByCreatedAtBetween(startOfMonth, endOfToday));
+
+        // Daily revenue for the last 7 days
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM");
+        List<OrderDtos.DailyRevenueDto> dailyList = new ArrayList<>();
+        for (int i = 6; i >= 0; i--) {
+            LocalDate day = now.toLocalDate().minusDays(i);
+            Instant dStart = day.atStartOfDay(zoneId).toInstant();
+            Instant dEnd = day.plusDays(1).atStartOfDay(zoneId).toInstant();
+            BigDecimal dRev = orderRepo.calculateEffectiveRevenueBetween(dStart, dEnd);
+            long dOrders = orderRepo.countByCreatedAtBetween(dStart, dEnd);
+            dailyList.add(new OrderDtos.DailyRevenueDto(day.format(df), dRev != null ? dRev : BigDecimal.ZERO, dOrders));
+        }
+        stats.setDailyRevenues(dailyList);
+
+        // Effective orders for top selling products & payment method calculation
+        List<Order> effectiveOrders = orderRepo.findAllEffectiveOrders();
+        Map<Long, OrderDtos.TopSellingProductDto> productSalesMap = new HashMap<>();
+        long codCount = 0;
+        long vnpayCount = 0;
+        BigDecimal codRev = BigDecimal.ZERO;
+        BigDecimal vnpayRev = BigDecimal.ZERO;
+
+        for (Order o : effectiveOrders) {
+            // Payment method breakdown
+            Optional<Payment> pOpt = paymentRepo.findByOrder(o);
+            String provider = pOpt.map(Payment::getProvider).orElse("COD");
+            if ("VNPAY".equalsIgnoreCase(provider)) {
+                vnpayCount++;
+                vnpayRev = vnpayRev.add(o.getTotalAmount());
+            } else {
+                codCount++;
+                codRev = codRev.add(o.getTotalAmount());
+            }
+
+            // Top products breakdown
+            if (o.getItems() != null) {
+                for (OrderItem item : o.getItems()) {
+                    if (item.getProduct() != null) {
+                        Long pId = item.getProduct().getId();
+                        BigDecimal itemAmount = item.getUnitPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+                        productSalesMap.compute(pId, (k, existing) -> {
+                            if (existing == null) {
+                                return new OrderDtos.TopSellingProductDto(
+                                        pId,
+                                        item.getProductName(),
+                                        item.getProduct().getImageUrl(),
+                                        item.getQuantity(),
+                                        itemAmount
+                                );
+                            } else {
+                                existing.setTotalQuantitySold(existing.getTotalQuantitySold() + item.getQuantity());
+                                existing.setTotalRevenue(existing.getTotalRevenue().add(itemAmount));
+                                return existing;
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        stats.setCodOrdersCount(codCount);
+        stats.setVnpayOrdersCount(vnpayCount);
+        stats.setCodRevenue(codRev);
+        stats.setVnpayRevenue(vnpayRev);
+
+        // Sort top selling products by quantity sold
+        List<OrderDtos.TopSellingProductDto> topProducts = productSalesMap.values().stream()
+                .sorted((a, b) -> Long.compare(b.getTotalQuantitySold(), a.getTotalQuantitySold()))
+                .limit(6)
+                .toList();
+        stats.setTopSellingProducts(topProducts);
+
+        // Low stock products list (<= 5)
+        List<Product> lowStock = productRepo.findByActiveTrueAndStockQuantityLessThanEqualOrderByStockQuantityAsc(5);
+        List<OrderDtos.LowStockProductDto> lowStockList = lowStock.stream().map(p ->
+                new OrderDtos.LowStockProductDto(
+                        p.getId(),
+                        p.getName(),
+                        p.getImageUrl(),
+                        p.getPrice(),
+                        p.getStockQuantity()
+                )
+        ).toList();
+        stats.setLowStockProductList(lowStockList);
+
+        // Recent orders
+        List<Order> recent = orderRepo.findAllByOrderByCreatedAtDesc();
+        stats.setRecentOrders(recent.stream().limit(8).map(this::toOrderResponse).toList());
+
+        return stats;
     }
 
     private OrderDtos.OrderResponse toOrderResponse(Order order) {

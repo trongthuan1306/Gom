@@ -229,9 +229,10 @@
   transition: all 0.2s ease;
 }
 
-.input-wrapper input:focus {
-  border-color: var(--clay, #a65c3b);
-  box-shadow: 0 0 0 3px rgba(166, 92, 59, 0.15);
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--brand-red, #731214);
+  box-shadow: 0 0 0 3px var(--brand-red-soft, rgba(115, 18, 20, 0.1));
 }
 
 .input-wrapper input.otp-input {
@@ -263,20 +264,20 @@
   margin-top: 6px;
   border: none;
   border-radius: 8px;
-  background: var(--brown, #4b2416);
+  background: var(--brand-red, #731214);
   color: #fff;
   padding: 14px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(75, 36, 22, 0.2);
+  box-shadow: 0 4px 14px rgba(115, 18, 20, 0.25);
 }
 
 .auth-primary-btn:hover:not(:disabled) {
-  background: #36190e;
+  background: var(--brand-red-hover, #8d181b);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(75, 36, 22, 0.3);
+  box-shadow: 0 6px 18px rgba(115, 18, 20, 0.35);
 }
 
 .auth-primary-btn:disabled {

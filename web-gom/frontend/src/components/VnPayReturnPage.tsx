@@ -77,7 +77,7 @@ export function VnPayReturnPage({ onBackToHome }: VnPayReturnPageProps) {
               <CheckCircle2 size={40} />
             </div>
             <h1 className="vnpay-return-title">Thanh toán Thành công! 🎉</h1>
-            <p className="vnpay-return-desc">Cảm ơn bạn đã tin tưởng lựa chọn Gốm Việt. Đơn hàng của bạn đang được xử lý.</p>
+            <p className="vnpay-return-desc">Cảm ơn bạn đã tin tưởng lựa chọn Hiên Gốm. Đơn hàng của bạn đang được xử lý.</p>
 
             <div className="vnpay-details-table">
               <div className="vnpay-detail-row">
@@ -86,7 +86,7 @@ export function VnPayReturnPage({ onBackToHome }: VnPayReturnPageProps) {
               </div>
               <div className="vnpay-detail-row">
                 <span>Tổng tiền đã thanh toán</span>
-                <span style={{ color: '#8B5E34' }}>{formatPrice(result.totalAmount)}</span>
+                <span style={{ color: 'var(--brand-red, #731214)', fontWeight: 700 }}>{formatPrice(result.totalAmount)}</span>
               </div>
               <div className="vnpay-detail-row">
                 <span>Cổng thanh toán</span>

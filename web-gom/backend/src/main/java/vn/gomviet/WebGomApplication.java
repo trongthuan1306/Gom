@@ -22,7 +22,7 @@ public class WebGomApplication {
             User admin = userRepository.findByEmailIgnoreCase(adminEmail).orElseGet(User::new);
             admin.setEmail(adminEmail);
             admin.setPasswordHash(passwordEncoder.encode("admin123"));
-            admin.setFullName("Quản Trị Viên Gốm Việt");
+            admin.setFullName("Quản Trị Viên Hiên Gốm");
             admin.setRole(Role.ADMIN);
             admin.setEnabled(true);
             userRepository.save(admin);

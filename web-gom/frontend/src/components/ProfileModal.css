@@ -61,12 +61,12 @@
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: var(--brown, #4b2416);
+  background: var(--brand-red, #731214);
   color: #fff;
   display: grid;
   place-items: center;
   margin-bottom: 14px;
-  box-shadow: 0 6px 16px rgba(75, 36, 22, 0.2);
+  box-shadow: 0 6px 16px rgba(115, 18, 20, 0.25);
 }
 
 .profile-sidebar h3 {
@@ -119,15 +119,15 @@
 }
 
 .profile-tab-btn:hover {
-  background: rgba(166, 92, 59, 0.08);
-  color: var(--brown, #4b2416);
+  background: var(--brand-red-soft, rgba(115, 18, 20, 0.08));
+  color: var(--brand-red, #731214);
 }
 
 .profile-tab-btn.active {
-  background: var(--brown, #4b2416);
+  background: var(--brand-red, #731214);
   color: #fff;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(75, 36, 22, 0.15);
+  box-shadow: 0 4px 12px rgba(115, 18, 20, 0.2);
 }
 
 /* Main Content */
@@ -206,28 +206,28 @@
   place-items: center;
 }
 
-.profile-submit-btn {
+.profile-save-btn {
+  margin-top: 8px;
+  align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 8px;
-  margin-top: 10px;
-  border: none;
+  padding: 12px 24px;
   border-radius: 8px;
-  background: var(--brown, #4b2416);
+  border: none;
+  background: var(--brand-red, #731214);
   color: #fff;
-  padding: 14px;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(75, 36, 22, 0.2);
+  box-shadow: 0 4px 12px rgba(115, 18, 20, 0.2);
 }
 
-.profile-submit-btn:hover:not(:disabled) {
-  background: #36190e;
+.profile-save-btn:hover:not(:disabled) {
+  background: var(--brand-red-hover, #8d181b);
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(75, 36, 22, 0.3);
+  box-shadow: 0 6px 16px rgba(115, 18, 20, 0.3);
 }
 
 .profile-submit-btn:disabled {

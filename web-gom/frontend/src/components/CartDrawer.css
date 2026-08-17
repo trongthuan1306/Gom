@@ -55,7 +55,7 @@
 
 .cart-badge-count {
   font-size: 0.8rem;
-  background: #c86d3b;
+  background: var(--brand-red, #731214);
   color: white;
   padding: 0.15rem 0.6rem;
   border-radius: 999px;
@@ -261,13 +261,13 @@
 }
 
 .cart-summary-row.total .amount {
-  color: #c86d3b;
+  color: var(--brand-red, #731214);
 }
 
 .btn-checkout {
   width: 100%;
   padding: 0.9rem;
-  background: #c86d3b;
+  background: var(--brand-red, #731214);
   color: #ffffff;
   border: none;
   border-radius: 8px;
@@ -278,13 +278,14 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(200, 109, 59, 0.25);
+  box-shadow: 0 4px 12px rgba(115, 18, 20, 0.3);
   transition: all 0.2s;
 }
 
 .btn-checkout:hover:not(:disabled) {
-  background: #a95628;
+  background: var(--brand-red-hover, #8d181b);
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(115, 18, 20, 0.4);
 }
 
 .btn-checkout:disabled {

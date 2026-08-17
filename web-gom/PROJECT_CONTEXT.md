@@ -1,11 +1,12 @@
 # WEB GỐM — PROJECT CONTEXT
 
-> Tài liệu bàn giao ngữ cảnh cho ChatGPT hoặc lập trình viên tiếp tục phát triển dự án.
-> Cập nhật theo mã nguồn trong workspace ngày 07/08/2026.
+Tài liệu này tổng hợp toàn bộ bối cảnh dự án, kiến trúc, luồng nghiệp vụ, cấu trúc dữ liệu, và trạng thái hiện tại của hệ thống để hỗ trợ phát triển tiếp.
 
-## 1. Tổng quan dự án
+---
 
-Web Gốm là website thương mại điện tử bán sản phẩm gốm Việt. Dự án đang ở giai đoạn MVP, gồm:
+## 1. Tổng quan Dự án
+
+**Hiên Gốm** là website thương mại điện tử bán sản phẩm gốm thủ công nghệ thuật đương đại. Dự án đang ở giai đoạn MVP, gồm:
 
 - Frontend React + TypeScript + Vite + Tailwind CSS.
 - Backend Spring Boot + Spring Security + JWT + Spring Data JPA.

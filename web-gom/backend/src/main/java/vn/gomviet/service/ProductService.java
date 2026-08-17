@@ -87,10 +87,54 @@ public class ProductService {
         p.setDimensions(request.dimensions() != null ? request.dimensions().trim() : null);
         p.setOrigin(request.origin() != null ? request.origin().trim() : null);
         p.setCareInstructions(request.careInstructions() != null ? request.careInstructions().trim() : null);
+        p.setItemType(request.itemType() != null ? request.itemType().trim() : null);
+        p.setFlowerType(request.flowerType() != null ? request.flowerType().trim() : null);
+        p.setSeason(request.season() != null ? request.season().trim() : null);
         p.setActive(true);
 
         Product saved = repo.save(p);
         return mapper.toDto(saved);
+    }
+
+    @Transactional
+    public ProductDto updateProduct(Long id, ProductDto.UpdateProductRequest request, MultipartFile imageFile) {
+        Product p = repo.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm #" + id));
+
+        if (imageFile != null && !imageFile.isEmpty()) {
+            try {
+                String imageUrl = cloudinaryService.uploadImage(imageFile);
+                if (imageUrl != null && !imageUrl.isBlank()) {
+                    p.setImageUrl(imageUrl);
+                }
+            } catch (Exception e) {
+                // If failed to upload new image, throw exception
+                throw e;
+            }
+        }
+
+        p.setName(request.name().trim());
+        p.setDescription(request.description() != null ? request.description().trim() : null);
+        p.setPrice(request.price());
+        p.setStockQuantity(request.stockQuantity());
+        p.setMaterials(request.materials() != null ? request.materials().trim() : null);
+        p.setDimensions(request.dimensions() != null ? request.dimensions().trim() : null);
+        p.setOrigin(request.origin() != null ? request.origin().trim() : null);
+        p.setCareInstructions(request.careInstructions() != null ? request.careInstructions().trim() : null);
+        p.setItemType(request.itemType() != null ? request.itemType().trim() : null);
+        p.setFlowerType(request.flowerType() != null ? request.flowerType().trim() : null);
+        p.setSeason(request.season() != null ? request.season().trim() : null);
+
+        Product updated = repo.save(p);
+        return mapper.toDto(updated);
+    }
+
+    @Transactional
+    public void deleteProduct(Long id) {
+        Product p = repo.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "Không tìm thấy sản phẩm #" + id));
+        p.setActive(false);
+        repo.save(p);
     }
 
     private static final Pattern NONLATIN = Pattern.compile("[^\\w-]");

@@ -41,6 +41,15 @@ public class Product {
     @Column(name = "care_instructions", columnDefinition = "text")
     private String careInstructions;
 
+    @Column(name = "item_type")
+    private String itemType;
+
+    @Column(name = "flower_type")
+    private String flowerType;
+
+    @Column
+    private String season;
+
     @Column(nullable = false)
     private boolean active = true;
 
@@ -68,6 +77,12 @@ public class Product {
     public void setOrigin(String origin) { this.origin = origin; }
     public String getCareInstructions() { return careInstructions; }
     public void setCareInstructions(String careInstructions) { this.careInstructions = careInstructions; }
+    public String getItemType() { return itemType; }
+    public void setItemType(String itemType) { this.itemType = itemType; }
+    public String getFlowerType() { return flowerType; }
+    public void setFlowerType(String flowerType) { this.flowerType = flowerType; }
+    public String getSeason() { return season; }
+    public void setSeason(String season) { this.season = season; }
     public boolean isActive() { return active; }
     public Boolean getActive() { return active; }
     public void setActive(boolean active) { this.active = active; }

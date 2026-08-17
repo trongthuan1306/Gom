@@ -49,4 +49,19 @@ public class ProductController {
         ProductDto created = service.createProduct(request, imageFile);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<ProductDto> updateProduct(
+            @PathVariable Long id,
+            @Valid @RequestPart("product") ProductDto.UpdateProductRequest request,
+            @RequestPart(value = "image", required = false) MultipartFile imageFile) {
+        ProductDto updated = service.updateProduct(id, request, imageFile);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
+        service.deleteProduct(id);
+        return ResponseEntity.noContent().build();
+    }
 }

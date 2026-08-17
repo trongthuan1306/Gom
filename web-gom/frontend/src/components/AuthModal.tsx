@@ -137,9 +137,12 @@ export function AuthModal({ onClose, onAuthenticated }: { onClose: () => void; o
         <div className="auth-banner">
           <div className="auth-banner-overlay" />
           <div className="auth-banner-content">
-            <span className="auth-badge"><Sparkles size={14} /> Gốm Thủ Công Việt</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <img src="/logo.png" alt="Hiên Gốm" style={{ height: '36px', width: 'auto', borderRadius: '4px' }} />
+              <span className="auth-badge"><Sparkles size={14} /> Hiên Gốm Đương Đại</span>
+            </div>
             <h3>Nét Đẹp Mộc Mạc,<br />Giữ Trọn An Yên</h3>
-            <p>Khám phá bộ sưu tập gốm tuyển chọn từ những nghệ nhân tâm huyết khắp Việt Nam.</p>
+            <p>Khám phá bộ sưu tập gốm tuyển chọn từ những nghệ nhân tâm huyết khắp Việt Nam tại Hiên Gốm.</p>
           </div>
         </div>
 
@@ -152,7 +155,7 @@ export function AuthModal({ onClose, onAuthenticated }: { onClose: () => void; o
           )}
 
           <div className="auth-header">
-            <p className="eyebrow">Tài khoản Gốm Việt</p>
+            <p className="eyebrow">Tài khoản Hiên Gốm</p>
             <h2>
               {mode === 'login' && 'Đăng nhập'}
               {mode === 'register' && 'Đăng ký tài khoản'}
@@ -161,8 +164,8 @@ export function AuthModal({ onClose, onAuthenticated }: { onClose: () => void; o
               {mode === 'reset-password' && 'Đặt lại mật khẩu'}
             </h2>
             <p className="auth-subtitle">
-              {mode === 'login' && 'Chào mừng bạn quay trở lại với không gian Gốm Việt.'}
-              {mode === 'register' && 'Tạo tài khoản để trải nghiệm dịch vụ mua sắm độc bản.'}
+              {mode === 'login' && 'Chào mừng bạn quay trở lại với không gian Hiên Gốm.'}
+              {mode === 'register' && 'Tạo tài khoản để trải nghiệm dịch vụ mua sắm độc bản tại Hiên Gốm.'}
               {mode === 'verify-email' && `Vui lòng nhập mã OTP 6 chữ số vừa được gửi đến ${email}`}
               {mode === 'forgot-password' && 'Nhập email đăng ký của bạn để nhận mã OTP khôi phục.'}
               {mode === 'reset-password' && 'Nhập mã OTP và mật khẩu mới cho tài khoản của bạn.'}

@@ -3,6 +3,18 @@ import { X, PackagePlus, ImagePlus, UploadCloud, CheckCircle2, DollarSign, Tag, 
 import { productsApi } from '../api/client'
 import './AddProductModal.css'
 
+const ITEM_TYPES = ['Tô', 'Chén', 'Dĩa'] as const
+const FLOWER_TYPES = ['Dã quỳ', 'Cúc trắng', 'Trinh nữ', 'Ngũ sắc'] as const
+const SEASONS = ['Xuân', 'Hạ', 'Thu', 'Đông'] as const
+
+// Hoa nở theo mùa: Ngũ sắc → Xuân, Trinh nữ → Hạ, Cúc trắng → Thu, Dã quỳ → Đông
+const FLOWER_SEASON_MAP: Record<string, string> = {
+  'Ngũ sắc': 'Xuân',
+  'Trinh nữ': 'Hạ',
+  'Cúc trắng': 'Thu',
+  'Dã quỳ': 'Đông',
+}
+
 export function AddProductModal({
   onClose,
   onProductCreated
@@ -18,6 +30,9 @@ export function AddProductModal({
   const [dimensions, setDimensions] = useState('')
   const [origin, setOrigin] = useState('Bát Tràng')
   const [careInstructions, setCareInstructions] = useState('')
+  const [itemType, setItemType] = useState('')
+  const [flowerType, setFlowerType] = useState('')
+  const [season, setSeason] = useState('')
 
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -27,6 +42,14 @@ export function AddProductModal({
   const [success, setSuccess] = useState('')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  function handleFlowerChange(flower: string) {
+    setFlowerType(flower)
+    // Tự động chọn mùa tương ứng
+    if (flower && FLOWER_SEASON_MAP[flower]) {
+      setSeason(FLOWER_SEASON_MAP[flower])
+    }
+  }
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) {
@@ -74,6 +97,9 @@ export function AddProductModal({
           dimensions: dimensions.trim() || undefined,
           origin: origin.trim() || undefined,
           careInstructions: careInstructions.trim() || undefined,
+          itemType: itemType || undefined,
+          flowerType: flowerType || undefined,
+          season: season || undefined,
         },
         imageFile || undefined
       )
@@ -210,6 +236,39 @@ export function AddProductModal({
                     value={dimensions}
                     onChange={e => setDimensions(e.target.value)}
                   />
+                </div>
+              </div>
+
+              {/* Thuộc tính phân loại Hiên Gốm */}
+              <div className="form-row-3">
+                <div className="input-field">
+                  <label>Thể loại</label>
+                  <div className="input-wrapper">
+                    <select value={itemType} onChange={e => setItemType(e.target.value)}>
+                      <option value="">— Chọn —</option>
+                      {ITEM_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="input-field">
+                  <label>Họa tiết Hoa</label>
+                  <div className="input-wrapper">
+                    <select value={flowerType} onChange={e => handleFlowerChange(e.target.value)}>
+                      <option value="">— Chọn —</option>
+                      {FLOWER_TYPES.map(f => <option key={f} value={f}>{f}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="input-field">
+                  <label>Mùa</label>
+                  <div className="input-wrapper">
+                    <select value={season} onChange={e => setSeason(e.target.value)}>
+                      <option value="">— Chọn —</option>
+                      {SEASONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
                 </div>
               </div>
 

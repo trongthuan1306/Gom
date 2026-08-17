@@ -96,20 +96,22 @@
 
 .vnpay-btn-primary {
   padding: 0.875rem 1.5rem;
-  background-color: #8B5E34;
+  background-color: var(--brand-red, #731214);
   color: white;
   border: none;
   border-radius: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(115, 18, 20, 0.25);
   transition: all 0.2s;
 }
 
 .vnpay-btn-primary:hover {
-  background-color: #6E4927;
+  background-color: var(--brand-red-hover, #8d181b);
   transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(115, 18, 20, 0.35);
 }
