@@ -409,13 +409,6 @@ export const cartApi = {
 };
 
 // ── Location & Order & Payment API ──────────────────────────────────
-export const categoriesApi = {
-  list: () => request<Category[] | any[]>('/categories', {}, undefined),
-  create: (body: any) => request<any>('/categories', { method: 'POST', body: JSON.stringify(body) }),
-  update: (id: number | string, body: any) => request<any>(`/categories/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-  delete: (id: number | string) => request<void>(`/categories/${id}`, { method: 'DELETE' }),
-};
-
 export const locationsApi = {
   getProvinces: (q?: string) => request<ProvinceResponse[]>(`/locations/provinces${q ? `?q=${encodeURIComponent(q)}` : ''}`, {}, undefined),
   getWards: (provinceCode: string, q?: string) => request<WardResponse[]>(`/locations/provinces/${provinceCode}/wards${q ? `?q=${encodeURIComponent(q)}` : ''}`, {}, undefined),
