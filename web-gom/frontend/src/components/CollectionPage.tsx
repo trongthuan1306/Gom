@@ -44,7 +44,7 @@ export function CollectionPage({
   // Filter products by this collection's season / flower
   const collectionProducts = allProducts.filter(p => {
     const matchSeason = p.season?.toLowerCase() === category.season.toLowerCase() ||
-                        p.flowerType?.toLowerCase() === category.flower.toLowerCase()
+      p.flowerType?.toLowerCase() === category.flower.toLowerCase()
     const matchType = selectedItemType === 'all' || p.itemType === selectedItemType
     return matchSeason && matchType
   })
@@ -81,7 +81,7 @@ export function CollectionPage({
       <section className="collection-hero-banner">
         <div className="collection-hero-overlay" />
         <img src={category.image} alt={category.name} className="collection-hero-bg-img" />
-        
+
         <div className="collection-hero-content">
           <div className="collection-hero-badge">
             <span className="flower-icon-large">{category.flowerIcon}</span>

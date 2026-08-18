@@ -192,7 +192,7 @@ export default function App() {
     const els = document.querySelectorAll('.reveal')
     els.forEach((el) => observer.observe(el))
     return () => observer.disconnect()
-  }, [productList, selectedProduct, selectedCollection, selectedSeason, selectedItemType])
+  }, [productList, categoriesList, selectedProduct, selectedCollection, selectedSeason, selectedItemType])
 
   const isStaffOrAdmin = user?.role === 'STAFF' || user?.role === 'ADMIN'
 
@@ -528,7 +528,7 @@ export default function App() {
           {/* Top Wave Divider */}
           <div className="new-arrival-wave-top" aria-hidden="true">
             <svg viewBox="0 0 1440 64" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0,24 C320,60 560,4 840,36 C1120,64 1300,16 1440,32 L1440,0 L0,0 Z" fill="#ffffff"/>
+              <path d="M0,24 C320,60 560,4 840,36 C1120,64 1300,16 1440,32 L1440,0 L0,0 Z" fill="#ffffff" />
             </svg>
           </div>
 
@@ -559,7 +559,7 @@ export default function App() {
           {/* Bottom Wave Divider */}
           <div className="new-arrival-wave-bottom" aria-hidden="true">
             <svg viewBox="0 0 1440 64" fill="none" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M0,40 C320,12 560,56 840,28 C1120,4 1300,48 1440,32 L1440,64 L0,64 Z" fill="#ffffff"/>
+              <path d="M0,40 C320,12 560,56 840,28 C1120,4 1300,48 1440,32 L1440,64 L0,64 Z" fill="#ffffff" />
             </svg>
           </div>
         </section>
