@@ -41,13 +41,15 @@ export function CollectionPage({
     setSelectedItemType('all')
   }, [category])
 
-  // Filter products by this collection's season / flower
-  const collectionProducts = allProducts.filter(p => {
-    const matchSeason = p.season?.toLowerCase() === category.season.toLowerCase() ||
-      p.flowerType?.toLowerCase() === category.flower.toLowerCase()
-    const matchType = selectedItemType === 'all' || p.itemType === selectedItemType
-    return matchSeason && matchType
-  })
+  // A collection represents one season.  Do not include a product just because
+  // its flower name happens to match: its stored season is the source of truth.
+  const normalizedSeason = category.season.trim().toLocaleLowerCase('vi-VN')
+  const seasonProducts = allProducts.filter(
+    p => p.season?.trim().toLocaleLowerCase('vi-VN') === normalizedSeason
+  )
+  const collectionProducts = seasonProducts.filter(
+    p => selectedItemType === 'all' || p.itemType === selectedItemType
+  )
 
   // Get other 3 seasons for quick switching
   const otherSeasons = categories.filter(c => c.id !== category.id)
@@ -138,7 +140,7 @@ export function CollectionPage({
               className={`type-pill-btn ${selectedItemType === 'all' ? 'active' : ''}`}
               onClick={() => setSelectedItemType('all')}
             >
-              Tất cả ({allProducts.filter(p => p.season === category.season).length})
+              Tất cả ({seasonProducts.length})
             </button>
             <button
               className={`type-pill-btn ${selectedItemType === 'Tô' ? 'active' : ''}`}
