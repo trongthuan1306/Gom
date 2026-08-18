@@ -53,8 +53,53 @@ export default function App() {
   const [selectedSeason, setSelectedSeason] = useState<string>('all')
   const [selectedItemType, setSelectedItemType] = useState<string>('all')
   const mainRef = useRef<HTMLElement>(null)
-
+  const scrollPositions = useRef<Record<string, number>>({})
+  const returnScrollKey = useRef<string | null>(null)
   const isVnPayReturn = window.location.pathname.includes('/payment/vnpay-return') || window.location.search.includes('vnp_ResponseCode')
+
+  const collectionScrollKey = (category: Category) => `collection:${category.id}`
+  const activeScrollKey = () => {
+    if (isAdminPage) return 'admin'
+    if (isCheckoutPage) return 'checkout'
+    if (selectedProduct) return `product:${selectedProduct.id}`
+    if (selectedCollection) return collectionScrollKey(selectedCollection)
+    return 'home'
+  }
+
+  const saveScrollPosition = (key = activeScrollKey()) => {
+    scrollPositions.current[key] = window.scrollY
+  }
+
+  const restoreScrollPosition = (key: string) => {
+    const position = scrollPositions.current[key] ?? 0
+    // The destination page scrolls to the top on mount. Waiting two frames makes
+    // this restoration run after its layout and data have been painted.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => window.scrollTo({ top: position, behavior: 'auto' }))
+    })
+  }
+
+  const openProduct = (product: Product) => {
+    saveScrollPosition()
+    setSelectedProduct(product)
+  }
+
+  const openCollection = (category: Category) => {
+    saveScrollPosition()
+    setSelectedCollection(category)
+  }
+
+  const openCheckout = () => {
+    saveScrollPosition()
+    returnScrollKey.current = activeScrollKey()
+    setIsCheckoutPage(true)
+  }
+
+  const openAdmin = () => {
+    saveScrollPosition()
+    returnScrollKey.current = activeScrollKey()
+    setIsAdminPage(true)
+  }
 
   async function loadProducts() {
     try {
@@ -212,7 +257,11 @@ export default function App() {
     return (
       <CartProvider>
         <AdminDashboardPage
-          onBack={() => setIsAdminPage(false)}
+          onBack={() => {
+            const returnTo = returnScrollKey.current ?? 'home'
+            setIsAdminPage(false)
+            restoreScrollPosition(returnTo)
+          }}
           products={productList}
           onProductsChanged={loadProducts}
           onCategoriesChanged={(cats) => setCategoriesList(cats)}
@@ -226,7 +275,11 @@ export default function App() {
     return (
       <CartProvider>
         <CheckoutPage
-          onBack={() => setIsCheckoutPage(false)}
+          onBack={() => {
+            const returnTo = returnScrollKey.current ?? 'home'
+            setIsCheckoutPage(false)
+            restoreScrollPosition(returnTo)
+          }}
         />
       </CartProvider>
     )
@@ -239,15 +292,19 @@ export default function App() {
         <ProductDetailPage
           product={selectedProduct}
           allProducts={productList}
-          onBack={() => setSelectedProduct(null)}
-          onSelectProduct={(p) => setSelectedProduct(p)}
+          onBack={() => {
+            const returnTo = selectedCollection ? collectionScrollKey(selectedCollection) : 'home'
+            setSelectedProduct(null)
+            restoreScrollPosition(returnTo)
+          }}
+          onSelectProduct={openProduct}
           onProductAdded={loadProducts}
-          onOpenAdmin={() => setIsAdminPage(true)}
-          onOpenCheckout={() => setIsCheckoutPage(true)}
+          onOpenAdmin={openAdmin}
+          onOpenCheckout={openCheckout}
         />
         <ChatButton
           products={productList}
-          onSelectProduct={(p) => setSelectedProduct(p)}
+          onSelectProduct={openProduct}
         />
       </CartProvider>
     )
@@ -261,18 +318,21 @@ export default function App() {
           category={selectedCollection}
           allProducts={productList}
           canEdit={isStaffOrAdmin}
-          onBack={() => setSelectedCollection(null)}
-          onSelectCategory={(cat) => setSelectedCollection(cat)}
-          onSelectProduct={(p) => setSelectedProduct(p)}
+          onBack={() => {
+            setSelectedCollection(null)
+            restoreScrollPosition('home')
+          }}
+          onSelectCategory={openCollection}
+          onSelectProduct={openProduct}
           onEditProduct={handleEditProduct}
           onDeleteProduct={handleDeleteProduct}
           onProductAdded={loadProducts}
-          onOpenAdmin={() => setIsAdminPage(true)}
-          onOpenCheckout={() => setIsCheckoutPage(true)}
+          onOpenAdmin={openAdmin}
+          onOpenCheckout={openCheckout}
         />
         <ChatButton
           products={productList}
-          onSelectProduct={(p) => setSelectedProduct(p)}
+          onSelectProduct={openProduct}
         />
       </CartProvider>
     )
@@ -286,8 +346,8 @@ export default function App() {
         onUserChange={setUser}
         onProductAdded={loadProducts}
         products={productList}
-        onOpenAdmin={() => setIsAdminPage(true)}
-        onOpenCheckout={() => setIsCheckoutPage(true)}
+        onOpenAdmin={openAdmin}
+        onOpenCheckout={openCheckout}
       />
       <main ref={mainRef}>
         <Hero />
@@ -355,7 +415,7 @@ export default function App() {
                   <CategoryCard
                     category={c}
                     canEdit={isStaffOrAdmin}
-                    onSelect={() => setSelectedCollection(c)}
+                    onSelect={() => openCollection(c)}
                     onEdit={handleEditCategory}
                     onDelete={handleDeleteCategory}
                   />
@@ -512,7 +572,7 @@ export default function App() {
                     <ProductCard
                       product={p}
                       canEdit={isStaffOrAdmin}
-                      onSelect={setSelectedProduct}
+                      onSelect={openProduct}
                       onEdit={handleEditProduct}
                       onDelete={handleDeleteProduct}
                     />
@@ -595,7 +655,7 @@ export default function App() {
       <Footer />
       <ChatButton
         products={productList}
-        onSelectProduct={(p) => setSelectedProduct(p)}
+        onSelectProduct={openProduct}
       />
 
       {addProductOpen && (
